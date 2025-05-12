@@ -593,7 +593,6 @@ function MainFeature({ onUpdate }) {
             <p className="text-surface-600 dark:text-surface-400 text-center max-w-md mb-6">
               Here you'll be able to track all your crops across different farms, their planting and harvest schedules, and yield data.
             </p>
-            <button className="btn btn-primary" onClick={() => handleCropFormOpen()}>
             <button className="btn btn-primary" onClick={() => handleCropFormOpen()} aria-label="Add new crop">
               Add New Crop
             </button>
