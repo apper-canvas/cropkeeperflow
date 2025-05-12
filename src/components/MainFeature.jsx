@@ -212,6 +212,7 @@ function MainFeature({ onUpdate }) {
     }
     if (!validateCropForm()) {
       return;
+    }
     setIsSubmitting(true);
     
     setTimeout(() => {
@@ -565,6 +566,7 @@ function MainFeature({ onUpdate }) {
                                   >
                                     <PlusIcon className="h-4 w-4 mr-1" />
                                     Add New Crop
+                              </div>
                               </div>
                             </motion.div>
                           )}
