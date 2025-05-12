@@ -226,22 +226,17 @@ function MainFeature({ onUpdate }) {
   };
   
   const handleExpenseRecord = () => {
-    // Toggle the expense modal visibility
+    // Check if farms exist first
     if (farms.length === 0) {
       alert("Please create a farm first before recording expenses.");
-      return;
+    } else {
+      setSelectedFarmId(null);
+      setShowFarmSelector(farms.length > 0);
+      setExpenseFormData({ amount: '', category: '', date: '', description: '' });
+      setFormErrors({});
     }
-    
-    setSelectedFarmId(null);
-    setShowFarmSelector(farms.length > 0);
+    // Always open the modal, even if there are no farms (to show the alert)
     setIsExpenseModalOpen(true);
-    setExpenseFormData({
-      amount: '',
-      category: '',
-      date: '',
-      description: ''
-    });
-    setFormErrors({});
   };
   
   const handleExpenseFormClose = () => {
