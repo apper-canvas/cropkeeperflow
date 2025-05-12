@@ -160,7 +160,6 @@ function MainFeature({ onUpdate }) {
     e.preventDefault();
     if (!validateForm()) {
       return;
-      return;
     
     // Simulate API call or processing delay
     setTimeout(() => {
