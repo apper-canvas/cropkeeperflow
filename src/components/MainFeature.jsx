@@ -156,7 +156,6 @@ function MainFeature({ onUpdate }) {
     }
   };
   };
-  
   const handleSubmit = (e) => {
     e.preventDefault();
     
