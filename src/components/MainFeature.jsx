@@ -568,7 +568,6 @@ function MainFeature({ onUpdate }) {
                                   </button>
                                 </div>
                               </div>
-                              </div>
                             </motion.div>
                           )}
                         </AnimatePresence>
