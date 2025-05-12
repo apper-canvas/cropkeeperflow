@@ -170,16 +170,28 @@ function MainFeature({ onUpdate }) {
     }, 800);
   };
   
-  const handleCropFormOpen = (farmId) => {
-    setSelectedFarmId(farmId);
-    setShowCropForm(true);
-    setCropFormData({
-      cropName: '',
-      plantDate: '',
-      expectedHarvest: '',
-      notes: ''
-    });
-    setFormErrors({});
+  const promptToSelectFarm = () => {
+    if (farms.length === 0) {
+      alert("You need to create a farm first before adding crops.");
+      setActiveTab('farms');
+    } else {
+      alert("Please select a farm to add this crop to.");
+      setActiveTab('farms');
+    }
+  };
+  
+  const handleCropFormOpen = (farmId = null) => {
+    if (farmId) {
+      setSelectedFarmId(farmId);
+      setShowCropForm(true);
+      setCropFormData({
+        cropName: '',
+        plantDate: '',
+        expectedHarvest: '',
+        notes: ''
+      });
+      setFormErrors({});
+    } else promptToSelectFarm();
   };
   
   const handleCropFormClose = () => {
@@ -573,7 +585,7 @@ function MainFeature({ onUpdate }) {
             <p className="text-surface-600 dark:text-surface-400 text-center max-w-md mb-6">
               Here you'll be able to track all your crops across different farms, their planting and harvest schedules, and yield data.
             </p>
-            <button className="btn btn-primary">
+            <button className="btn btn-primary" onClick={() => handleCropFormOpen()}>
               <PlusIcon className="h-4 w-4 mr-1" />
               Add New Crop
             </button>
