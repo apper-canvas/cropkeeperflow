@@ -28,6 +28,7 @@ function MainFeature({ onUpdate }) {
     notes: ''
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [selectedFarmId, setSelectedFarmId] = useState(null);
   const [showFarmSelector, setShowFarmSelector] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -196,6 +197,11 @@ function MainFeature({ onUpdate }) {
   const handleCropFormClose = () => {
     setIsModalOpen(false);
     setSelectedFarmId(null);
+  };
+  
+  const handleExpenseRecord = () => {
+    // Toggle the expense modal visibility
+    setIsExpenseModalOpen(true);
   };
   
   const handleCropSubmit = (e) => {
@@ -615,7 +621,7 @@ function MainFeature({ onUpdate }) {
             <p className="text-surface-600 dark:text-surface-400 text-center max-w-md mb-6">
               Record and categorize all your farm-related expenses, generate reports, and gain insights into your farm's financial health.
             </p>
-            <button className="btn btn-primary">
+            <button className="btn btn-primary" onClick={handleExpenseRecord}>
               <PlusIcon className="h-4 w-4 mr-1" />
               Record Expense
             </button>
