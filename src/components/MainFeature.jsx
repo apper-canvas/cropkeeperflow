@@ -156,13 +156,12 @@ function MainFeature({ onUpdate }) {
     }
   };
   };
-  
   const handleSubmit = (e) => {
     
+    e.preventDefault();
     if (!validateForm()) {
       return;
       return;
-    
     setIsSubmitting(true);
     
     // Simulate API call or processing delay
