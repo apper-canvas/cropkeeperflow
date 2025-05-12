@@ -1,6 +1,7 @@
 import React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
 import getIcon from '../utils/iconUtils';
 
@@ -21,6 +22,14 @@ function MainFeature({ onUpdate }) {
   const [activeTab, setActiveTab] = useState('farms');
   const [selectedFarm, setSelectedFarm] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+  const [cropFormData, setCropFormData] = useState({
+    cropName: '',
+    plantDate: '',
+    expectedHarvest: '',
+    notes: ''
+  });
+  const [showCropForm, setShowCropForm] = useState(false);
+  const [selectedFarmId, setSelectedFarmId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Get icons
@@ -78,6 +87,17 @@ function MainFeature({ onUpdate }) {
     return Object.keys(errors).length === 0;
   };
   
+  const validateCropForm = () => {
+    const errors = {};
+    
+    if (!cropFormData.cropName.trim()) {
+      errors.cropName = "Crop name is required";
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -91,6 +111,18 @@ function MainFeature({ onUpdate }) {
         ...prev,
         [name]: undefined
       }));
+    }
+  };
+  
+  const handleCropInputChange = (e) => {
+    const { name, value } = e.target;
+    setCropFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
   
@@ -138,6 +170,54 @@ function MainFeature({ onUpdate }) {
       
       toast.success("Farm added successfully!");
       setIsSubmitting(false);
+    }, 800);
+  };
+  
+  const handleCropFormOpen = (farmId) => {
+    setSelectedFarmId(farmId);
+    setShowCropForm(true);
+    setCropFormData({
+      cropName: '',
+      plantDate: '',
+      expectedHarvest: '',
+      notes: ''
+    });
+    setFormErrors({});
+  };
+  
+  const handleCropFormClose = () => {
+    setShowCropForm(false);
+    setSelectedFarmId(null);
+  };
+  
+  const handleCropSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!validateCropForm()) {
+      toast.error("Please provide a name for the crop");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    setTimeout(() => {
+      const newCrop = {
+        id: Date.now().toString() + '-crop',
+        name: cropFormData.cropName,
+        plantedDate: cropFormData.plantDate,
+        expectedHarvestDate: cropFormData.expectedHarvest,
+        notes: cropFormData.notes
+      };
+      
+      setFarms(prev => prev.map(farm => 
+        farm.id === selectedFarmId 
+          ? { ...farm, crops: [...(farm.crops || []), newCrop] } 
+          : farm
+      ));
+      
+      toast.success("New crop added successfully!");
+      setIsSubmitting(false);
+      handleCropFormClose();
     }, 800);
   };
   
@@ -466,8 +546,9 @@ function MainFeature({ onUpdate }) {
                                 </div>
                                 
                                 <div className="mt-4">
-                                  <button className="btn btn-outline w-full">
+                                  <button className="btn btn-outline w-full" onClick={() => handleCropFormOpen(farm.id)}>
                                     <PlusIcon className="h-4 w-4 mr-1" />
+                                    
                                     Add New Crop
                                   </button>
                                 </div>
@@ -499,7 +580,7 @@ function MainFeature({ onUpdate }) {
               Here you'll be able to track all your crops across different farms, their planting and harvest schedules, and yield data.
             </p>
             <button className="btn btn-primary">
-              <PlusIcon className="h-4 w-4 mr-1" />
+              <PlusIcon className="h-4 w-4 mr-1" onClick={() => toast.info("Please select a farm to add crops to")} />
               Add New Crop
             </button>
           </motion.div>
@@ -528,6 +609,73 @@ function MainFeature({ onUpdate }) {
           </motion.div>
         )}
       </AnimatePresence>
+      
+      {showCropForm && createPortal(
+        <div className="fixed inset-0 bg-surface-900/50 dark:bg-surface-900/80 flex items-center justify-center z-50 p-4">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="bg-white dark:bg-surface-800 rounded-xl shadow-lg max-w-md w-full"
+          >
+            <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
+              <h3 className="font-semibold text-lg flex items-center gap-2">
+                <CropIcon className="h-5 w-5 text-green-500" />
+                Add New Crop
+              </h3>
+              <button 
+                onClick={handleCropFormClose}
+                className="p-1 rounded-full hover:bg-surface-100 dark:hover:bg-surface-700"
+              >
+                <CloseIcon className="h-5 w-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCropSubmit} className="p-4">
+              <div className="form-group">
+                <label htmlFor="cropName" className="form-label flex items-center gap-1">
+                  <CropIcon className="h-4 w-4" />
+                  Crop Name*
+                </label>
+                <input
+                  type="text"
+                  id="cropName"
+                  name="cropName"
+                  value={cropFormData.cropName}
+                  onChange={handleCropInputChange}
+                  className={`input-field ${formErrors.cropName ? 'border-red-500 dark:border-red-400' : ''}`}
+                  placeholder="Corn, Wheat, etc."
+                />
+                {formErrors.cropName && (
+                  <p className="text-red-500 text-xs mt-1">{formErrors.cropName}</p>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="form-group">
+                  <label htmlFor="plantDate" className="form-label">Planting Date</label>
+                  <input type="date" id="plantDate" name="plantDate" value={cropFormData.plantDate} onChange={handleCropInputChange} className="input-field" />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="expectedHarvest" className="form-label">Expected Harvest</label>
+                  <input type="date" id="expectedHarvest" name="expectedHarvest" value={cropFormData.expectedHarvest} onChange={handleCropInputChange} className="input-field" />
+                </div>
+              </div>
+              
+              <div className="form-group">
+                <label htmlFor="cropNotes" className="form-label">Notes</label>
+                <textarea id="cropNotes" name="notes" value={cropFormData.notes} onChange={handleCropInputChange} className="input-field min-h-[80px]" placeholder="Add notes about this crop..."></textarea>
+              </div>
+              
+              <button type="submit" className="btn btn-primary w-full mt-4" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Crop'}
+              </button>
+            </form>
+          </motion.div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 }
