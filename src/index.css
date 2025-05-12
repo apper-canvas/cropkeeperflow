@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import 'react-toastify/dist/ReactToastify.css';
-
 @layer base {
   body {
     @apply font-sans text-surface-800 dark:text-surface-100 antialiased;

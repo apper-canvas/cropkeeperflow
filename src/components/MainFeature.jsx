@@ -2,7 +2,6 @@ import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { toast } from 'react-toastify';
 import getIcon from '../utils/iconUtils';
 
 function MainFeature({ onUpdate }) {
@@ -130,7 +129,6 @@ function MainFeature({ onUpdate }) {
     e.preventDefault();
     
     if (!validateForm()) {
-      toast.error("Please fix the errors in the form");
       return;
     }
     
@@ -168,7 +166,6 @@ function MainFeature({ onUpdate }) {
         notes: ''
       });
       
-      toast.success("Farm added successfully!");
       setIsSubmitting(false);
     }, 800);
   };
@@ -194,7 +191,6 @@ function MainFeature({ onUpdate }) {
     e.preventDefault();
     
     if (!validateCropForm()) {
-      toast.error("Please provide a name for the crop");
       return;
     }
     
@@ -215,7 +211,6 @@ function MainFeature({ onUpdate }) {
           : farm
       ));
       
-      toast.success("New crop added successfully!");
       setIsSubmitting(false);
       handleCropFormClose();
     }, 800);
@@ -234,7 +229,6 @@ function MainFeature({ onUpdate }) {
   const deleteFarm = (farmId) => {
     if (window.confirm("Are you sure you want to delete this farm?")) {
       setFarms(prev => prev.filter(farm => farm.id !== farmId));
-      toast.info("Farm deleted");
     }
   };
   
@@ -580,7 +574,7 @@ function MainFeature({ onUpdate }) {
               Here you'll be able to track all your crops across different farms, their planting and harvest schedules, and yield data.
             </p>
             <button className="btn btn-primary">
-              <PlusIcon className="h-4 w-4 mr-1" onClick={() => toast.info("Please select a farm to add crops to")} />
+              <PlusIcon className="h-4 w-4 mr-1" />
               Add New Crop
             </button>
           </motion.div>

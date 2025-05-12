@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
 import getIcon from '../utils/iconUtils';
 import MainFeature from '../components/MainFeature';
 
@@ -47,9 +46,6 @@ function Home() {
       const updated = {...prev, ...newStats};
       return updated;
     });
-    
-    // Show success toast
-    toast.success("Farm data updated successfully!");
   };
   
   // Data for the weather forecast display
