@@ -227,6 +227,7 @@ function MainFeature({ onUpdate }) {
   
   const handleExpenseRecord = () => {
     // Check if farms exist first
+    setIsExpenseModalOpen(true);
     if (farms.length === 0) {
       alert("Please create a farm first before recording expenses.");
     } else {
@@ -236,10 +237,6 @@ function MainFeature({ onUpdate }) {
       setExpenseFormData({ amount: '', category: '', date: '', description: '' });
       setFormErrors({});
     }
-    
-    // Always open the modal, even if there are no farms
-    // If no farms, we'll show an alert via the code above
-    setIsExpenseModalOpen(true);
   };
   
   const handleExpenseFormClose = () => {
