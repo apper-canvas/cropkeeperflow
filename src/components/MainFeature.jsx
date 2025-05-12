@@ -175,7 +175,6 @@ function MainFeature({ onUpdate }) {
     // Handle the case when no farms exist
     if (farms.length === 0) {
       alert("Please create a farm first before adding crops.");
-      setActiveTab('farms');
       return;
     }
     
