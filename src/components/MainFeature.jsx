@@ -594,7 +594,7 @@ function MainFeature({ onUpdate }) {
               Here you'll be able to track all your crops across different farms, their planting and harvest schedules, and yield data.
             </p>
             <button className="btn btn-primary" onClick={() => handleCropFormOpen()}>
-              <PlusIcon className="h-4 w-4 mr-1" />
+            <button className="btn btn-primary" onClick={() => handleCropFormOpen()} aria-label="Add new crop">
               Add New Crop
             </button>
           </motion.div>
