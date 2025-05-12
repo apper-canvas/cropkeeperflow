@@ -155,14 +155,12 @@ function MainFeature({ onUpdate }) {
       setFormErrors(prev => ({ ...prev, [name]: undefined }));
     }
   };
-  };
   const handleSubmit = (e) => {
     
     e.preventDefault();
     if (!validateForm()) {
       return;
       return;
-    setIsSubmitting(true);
     
     // Simulate API call or processing delay
     setTimeout(() => {
