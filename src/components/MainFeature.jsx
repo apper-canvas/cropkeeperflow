@@ -27,7 +27,7 @@ function MainFeature({ onUpdate }) {
     expectedHarvest: '',
     notes: ''
   });
-  const [showCropForm, setShowCropForm] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFarmId, setSelectedFarmId] = useState(null);
   const [showFarmSelector, setShowFarmSelector] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -172,15 +172,19 @@ function MainFeature({ onUpdate }) {
   };
   
   const handleCropFormOpen = (farmId = null) => {
-    if (!farmId && farms.length === 0) {
+    // Handle the case when no farms exist
+    if (farms.length === 0) {
       alert("Please create a farm first before adding crops.");
       setActiveTab('farms');
       return;
     }
     
+    // Set farm selector visibility if no specific farm is selected
+    const shouldShowSelector = !farmId && farms.length > 0;
+    
     setSelectedFarmId(farmId);
-    setShowFarmSelector(!farmId && farms.length > 0);
-    setShowCropForm(true);
+    setShowFarmSelector(shouldShowSelector);
+    setIsModalOpen(true);
     setCropFormData({
       cropName: '',
       plantDate: '',
@@ -191,7 +195,7 @@ function MainFeature({ onUpdate }) {
   };
   
   const handleCropFormClose = () => {
-    setShowCropForm(false);
+    setIsModalOpen(false);
     setSelectedFarmId(null);
   };
   
@@ -555,12 +559,12 @@ function MainFeature({ onUpdate }) {
                                 </div>
                                 
                                 <div className="mt-4">
-                                  <button className="btn btn-outline w-full" onClick={() => handleCropFormOpen(farm.id)}>
+                                  <button 
+                                    className="btn btn-outline w-full" 
+                                    onClick={() => handleCropFormOpen(farm.id)}
+                                  >
                                     <PlusIcon className="h-4 w-4 mr-1" />
-                                    
                                     Add New Crop
-                                  </button>
-                                </div>
                               </div>
                             </motion.div>
                           )}
@@ -618,87 +622,128 @@ function MainFeature({ onUpdate }) {
           </motion.div>
         )}
       </AnimatePresence>
-      
-      {showCropForm && createPortal(
-        <div className="fixed inset-0 bg-surface-900/50 dark:bg-surface-900/80 flex items-center justify-center z-50 p-4">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            className="bg-white dark:bg-surface-800 rounded-xl shadow-lg max-w-md w-full"
+
+      {/* Crop Form Modal */}
+      <CropFormModal 
+        isOpen={isModalOpen}
+        onClose={handleCropFormClose}
+        onSubmit={handleCropSubmit}
+        cropFormData={cropFormData}
+        handleCropInputChange={handleCropInputChange}
+        formErrors={formErrors}
+        isSubmitting={isSubmitting}
+        showFarmSelector={showFarmSelector}
+        farms={farms}
+      />
+    </div>
+  );
+}
+
+// Crop Form Modal Component
+function CropFormModal({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  cropFormData, 
+  handleCropInputChange, 
+  formErrors, 
+  isSubmitting, 
+  showFarmSelector, 
+  farms 
+}) {
+  const CropIcon = getIcon('Sprout');
+  const FarmIcon = getIcon('Warehouse');
+  const CloseIcon = getIcon('X');
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-surface-900/50 dark:bg-surface-900/80 flex items-center justify-center z-50 p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white dark:bg-surface-800 rounded-xl shadow-lg max-w-md w-full"
+      >
+        <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            <CropIcon className="h-5 w-5 text-green-500" />
+            Add New Crop
+          </h3>
+          <button 
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-surface-100 dark:hover:bg-surface-700"
+            aria-label="Close modal"
           >
-            <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                <CropIcon className="h-5 w-5 text-green-500" />
-                Add New Crop
-              </h3>
-              {showFarmSelector && (
-                <div className="form-group mb-2">
-                  <label htmlFor="farmSelector" className="form-label flex items-center gap-1">
-                    <FarmIcon className="h-4 w-4" />
-                    Select Farm*
-                  </label>
-                  <select id="farmSelector" className={`input-field ${formErrors.farmSelector ? 'border-red-500 dark:border-red-400' : ''}`}>
-                    <option value="">Select a farm</option>
-                    {farms.map(farm => <option key={farm.id} value={farm.id}>{farm.name}</option>)}
-                  </select>
-                  {formErrors.farmSelector && <p className="text-red-500 text-xs mt-1">{formErrors.farmSelector}</p>}
-                </div>
-              )}
-              <button 
-                onClick={handleCropFormClose}
-                className="p-1 rounded-full hover:bg-surface-100 dark:hover:bg-surface-700"
+            <CloseIcon className="h-5 w-5" />
+          </button>
+        </div>
+        
+        <form onSubmit={onSubmit} className="p-4">
+          {showFarmSelector && (
+            <div className="form-group mb-4">
+              <label htmlFor="farmSelector" className="form-label flex items-center gap-1">
+                <FarmIcon className="h-4 w-4" />
+                Select Farm*
+              </label>
+              <select 
+                id="farmSelector" 
+                className={`input-field ${formErrors.farmSelector ? 'border-red-500 dark:border-red-400' : ''}`}
               >
-                <CloseIcon className="h-5 w-5" />
-              </button>
+                <option value="">Select a farm</option>
+                {farms.map(farm => (
+                  <option key={farm.id} value={farm.id}>{farm.name}</option>
+                ))}
+              </select>
+              {formErrors.farmSelector && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.farmSelector}</p>
+              )}
+            </div>
+          )}
+          
+          <div className="form-group">
+            <label htmlFor="cropName" className="form-label flex items-center gap-1">
+              <CropIcon className="h-4 w-4" />
+              Crop Name*
+            </label>
+            <input
+              type="text"
+              id="cropName"
+              name="cropName"
+              value={cropFormData.cropName}
+              onChange={handleCropInputChange}
+              className={`input-field ${formErrors.cropName ? 'border-red-500 dark:border-red-400' : ''}`}
+              placeholder="Corn, Wheat, etc."
+            />
+            {formErrors.cropName && (
+              <p className="text-red-500 text-xs mt-1">{formErrors.cropName}</p>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label htmlFor="plantDate" className="form-label">Planting Date</label>
+              <input type="date" id="plantDate" name="plantDate" value={cropFormData.plantDate} onChange={handleCropInputChange} className="input-field" />
             </div>
             
-            <form onSubmit={handleCropSubmit} className="p-4">
-              <div className="form-group">
-                <label htmlFor="cropName" className="form-label flex items-center gap-1">
-                  <CropIcon className="h-4 w-4" />
-                  Crop Name*
-                </label>
-                <input
-                  type="text"
-                  id="cropName"
-                  name="cropName"
-                  value={cropFormData.cropName}
-                  onChange={handleCropInputChange}
-                  className={`input-field ${formErrors.cropName ? 'border-red-500 dark:border-red-400' : ''}`}
-                  placeholder="Corn, Wheat, etc."
-                />
-                {formErrors.cropName && (
-                  <p className="text-red-500 text-xs mt-1">{formErrors.cropName}</p>
-                )}
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="form-group">
-                  <label htmlFor="plantDate" className="form-label">Planting Date</label>
-                  <input type="date" id="plantDate" name="plantDate" value={cropFormData.plantDate} onChange={handleCropInputChange} className="input-field" />
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="expectedHarvest" className="form-label">Expected Harvest</label>
-                  <input type="date" id="expectedHarvest" name="expectedHarvest" value={cropFormData.expectedHarvest} onChange={handleCropInputChange} className="input-field" />
-                </div>
-              </div>
-              
-              <div className="form-group">
-                <label htmlFor="cropNotes" className="form-label">Notes</label>
-                <textarea id="cropNotes" name="notes" value={cropFormData.notes} onChange={handleCropInputChange} className="input-field min-h-[80px]" placeholder="Add notes about this crop..."></textarea>
-              </div>
-              
-              <button type="submit" className="btn btn-primary w-full mt-4" disabled={isSubmitting}>
-                {isSubmitting ? 'Saving...' : 'Save Crop'}
-              </button>
-            </form>
-          </motion.div>
-        </div>,
-        document.body
-      )}
-    </div>
+            <div className="form-group">
+              <label htmlFor="expectedHarvest" className="form-label">Expected Harvest</label>
+              <input type="date" id="expectedHarvest" name="expectedHarvest" value={cropFormData.expectedHarvest} onChange={handleCropInputChange} className="input-field" />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="cropNotes" className="form-label">Notes</label>
+            <textarea id="cropNotes" name="notes" value={cropFormData.notes} onChange={handleCropInputChange} className="input-field min-h-[80px]" placeholder="Add notes about this crop..."></textarea>
+          </div>
+          
+          <button type="submit" className="btn btn-primary w-full mt-4" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Save Crop'}
+          </button>
+        </form>
+      </motion.div>
+    </div>,
+    document.body
   );
 }
 
