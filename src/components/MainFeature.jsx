@@ -230,12 +230,15 @@ function MainFeature({ onUpdate }) {
     if (farms.length === 0) {
       alert("Please create a farm first before recording expenses.");
     } else {
+      // Only setup the form if we have farms
       setSelectedFarmId(null);
       setShowFarmSelector(farms.length > 0);
       setExpenseFormData({ amount: '', category: '', date: '', description: '' });
       setFormErrors({});
     }
-    // Always open the modal, even if there are no farms (to show the alert)
+    
+    // Always open the modal, even if there are no farms
+    // If no farms, we'll show an alert via the code above
     setIsExpenseModalOpen(true);
   };
   
