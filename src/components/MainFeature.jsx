@@ -28,6 +28,12 @@ function MainFeature({ onUpdate }) {
     notes: ''
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [expenseFormData, setExpenseFormData] = useState({
+    amount: '',
+    category: '',
+    date: '',
+    description: ''
+  });
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [selectedFarmId, setSelectedFarmId] = useState(null);
   const [showFarmSelector, setShowFarmSelector] = useState(false);
@@ -99,6 +105,17 @@ function MainFeature({ onUpdate }) {
     return Object.keys(errors).length === 0;
   };
   
+  const validateExpenseForm = () => {
+    const errors = {};
+    
+    if (!expenseFormData.amount || isNaN(expenseFormData.amount) || Number(expenseFormData.amount) <= 0) {
+      errors.amount = "Please enter a valid amount";
+    }
+    
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -125,6 +142,18 @@ function MainFeature({ onUpdate }) {
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: undefined }));
     }
+
+  const handleExpenseInputChange = (e) => {
+    const { name, value } = e.target;
+    setExpenseFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    if (formErrors[name]) {
+      setFormErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
   };
   
   const handleSubmit = (e) => {
@@ -201,7 +230,39 @@ function MainFeature({ onUpdate }) {
   
   const handleExpenseRecord = () => {
     // Toggle the expense modal visibility
+    if (farms.length === 0) {
+      alert("Please create a farm first before recording expenses.");
+      return;
+    }
+    
+    setSelectedFarmId(null);
+    setShowFarmSelector(farms.length > 0);
     setIsExpenseModalOpen(true);
+    setExpenseFormData({
+      amount: '',
+      category: '',
+      date: '',
+      description: ''
+    });
+    setFormErrors({});
+  };
+  
+  const handleExpenseFormClose = () => {
+    setIsExpenseModalOpen(false);
+    setSelectedFarmId(null);
+  };
+
+  const handleExpenseSubmit = (e) => {
+    e.preventDefault();
+    
+    const farmId = selectedFarmId || document.getElementById('expenseFarmSelector')?.value;
+    
+    if (!farmId) {
+      setFormErrors({...formErrors, farmSelector: "Please select a farm"});
+      return;
+    }
+    if (!validateExpenseForm()) return;
+    // Implementation for saving expense will go here
   };
   
   const handleCropSubmit = (e) => {
@@ -641,6 +702,17 @@ function MainFeature({ onUpdate }) {
         showFarmSelector={showFarmSelector}
         farms={farms}
       />
+      <ExpenseFormModal
+        isOpen={isExpenseModalOpen}
+        onClose={handleExpenseFormClose}
+        onSubmit={handleExpenseSubmit}
+        expenseFormData={expenseFormData}
+        handleExpenseInputChange={handleExpenseInputChange}
+        formErrors={formErrors}
+        isSubmitting={isSubmitting}
+        showFarmSelector={showFarmSelector}
+        farms={farms}
+      />
     </div>
   );
 }
@@ -745,6 +817,143 @@ function CropFormModal({
           
           <button type="submit" className="btn btn-primary w-full mt-4" disabled={isSubmitting}>
             {isSubmitting ? 'Saving...' : 'Save Crop'}
+          </button>
+        </form>
+      </motion.div>
+    </div>,
+    document.body
+  );
+}
+
+// Expense Form Modal Component
+function ExpenseFormModal({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  expenseFormData, 
+  handleExpenseInputChange, 
+  formErrors, 
+  isSubmitting, 
+  showFarmSelector, 
+  farms 
+}) {
+  const ReceiptIcon = getIcon('Receipt');
+  const FarmIcon = getIcon('Warehouse');
+  const CloseIcon = getIcon('X');
+  const DollarIcon = getIcon('DollarSign');
+  const TagIcon = getIcon('Tag');
+  const CalendarIcon = getIcon('Calendar');
+  const NoteIcon = getIcon('FileText');
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 bg-surface-900/50 dark:bg-surface-900/80 flex items-center justify-center z-50 p-4">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.9 }}
+        className="bg-white dark:bg-surface-800 rounded-xl shadow-lg max-w-md w-full"
+      >
+        <div className="flex items-center justify-between p-4 border-b border-surface-200 dark:border-surface-700">
+          <h3 className="font-semibold text-lg flex items-center gap-2">
+            <ReceiptIcon className="h-5 w-5 text-secondary" />
+            Record Expense
+          </h3>
+          <button 
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-surface-100 dark:hover:bg-surface-700"
+            aria-label="Close modal"
+          >
+            <CloseIcon className="h-5 w-5" />
+          </button>
+        </div>
+        
+        <form onSubmit={onSubmit} className="p-4">
+          {showFarmSelector && (
+            <div className="form-group mb-4">
+              <label htmlFor="expenseFarmSelector" className="form-label flex items-center gap-1">
+                <FarmIcon className="h-4 w-4" />
+                Select Farm*
+              </label>
+              <select 
+                id="expenseFarmSelector" 
+                className={`input-field ${formErrors.farmSelector ? 'border-red-500 dark:border-red-400' : ''}`}
+              >
+                <option value="">Select a farm</option>
+                {farms.map(farm => (
+                  <option key={farm.id} value={farm.id}>{farm.name}</option>
+                ))}
+              </select>
+              {formErrors.farmSelector && (
+                <p className="text-red-500 text-xs mt-1">{formErrors.farmSelector}</p>
+              )}
+            </div>
+          )}
+          
+          <div className="form-group">
+            <label htmlFor="amount" className="form-label flex items-center gap-1">
+              <DollarIcon className="h-4 w-4" />
+              Amount*
+            </label>
+            <input
+              type="number"
+              id="amount"
+              name="amount"
+              min="0.01"
+              step="0.01"
+              value={expenseFormData.amount}
+              onChange={handleExpenseInputChange}
+              className={`input-field ${formErrors.amount ? 'border-red-500 dark:border-red-400' : ''}`}
+              placeholder="0.00"
+            />
+            {formErrors.amount && (
+              <p className="text-red-500 text-xs mt-1">{formErrors.amount}</p>
+            )}
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="form-group">
+              <label htmlFor="category" className="form-label flex items-center gap-1">
+                <TagIcon className="h-4 w-4" />
+                Category
+              </label>
+              <select
+                id="category"
+                name="category"
+                value={expenseFormData.category}
+                onChange={handleExpenseInputChange}
+                className="input-field"
+              >
+                <option value="">Select category</option>
+                <option value="seeds">Seeds</option>
+                <option value="fertilizer">Fertilizer</option>
+                <option value="equipment">Equipment</option>
+                <option value="labor">Labor</option>
+                <option value="fuel">Fuel</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="date" className="form-label flex items-center gap-1">
+                <CalendarIcon className="h-4 w-4" />
+                Date
+              </label>
+              <input type="date" id="date" name="date" value={expenseFormData.date} onChange={handleExpenseInputChange} className="input-field" />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="description" className="form-label flex items-center gap-1">
+              <NoteIcon className="h-4 w-4" />
+              Description
+            </label>
+            <textarea id="description" name="description" value={expenseFormData.description} onChange={handleExpenseInputChange} className="input-field min-h-[80px]" placeholder="Add details about this expense..."></textarea>
+          </div>
+          
+          <button type="submit" className="btn btn-primary w-full mt-4" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : 'Save Expense'}
           </button>
         </form>
       </motion.div>
