@@ -70,4 +70,10 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+  
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  
 }

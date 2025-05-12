@@ -728,8 +728,8 @@ function CropFormModal({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-surface-900/50 dark:bg-surface-900/80 flex items-center justify-center z-50 p-4">
-      <motion.div 
+    <div className="fixed inset-0 bg-surface-900/50 dark:bg-surface-900/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
@@ -840,8 +840,8 @@ function ExpenseFormModal({
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 bg-surface-900/50 dark:bg-surface-900/80 flex items-center justify-center z-50 p-4">
-      <motion.div 
+    <div className="fixed inset-0 bg-surface-900/50 dark:bg-surface-900/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
