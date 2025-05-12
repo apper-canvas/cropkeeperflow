@@ -562,9 +562,9 @@ function MainFeature({ onUpdate }) {
                                     className="btn btn-outline w-full" 
                                     onClick={() => handleCropFormOpen(farm.id)}
                                   >
-                                    <PlusIcon className="h-4 w-4 mr-1" />
-                                    Add New Crop
-                                  </button>
+                                  <PlusIcon className="h-4 w-4 mr-1" />
+                                  Add New Crop
+                                </button>
                                 </div>
                               </div>
                             </motion.div>
