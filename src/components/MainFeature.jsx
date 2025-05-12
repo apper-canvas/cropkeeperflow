@@ -156,11 +156,12 @@ function MainFeature({ onUpdate }) {
     }
   };
   };
-    e.preventDefault();
+  
+  const handleSubmit = (e) => {
     
     if (!validateForm()) {
       return;
-    }
+      return;
     
     setIsSubmitting(true);
     
