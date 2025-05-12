@@ -29,6 +29,7 @@ function MainFeature({ onUpdate }) {
   });
   const [showCropForm, setShowCropForm] = useState(false);
   const [selectedFarmId, setSelectedFarmId] = useState(null);
+  const [showFarmSelector, setShowFarmSelector] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Get icons
@@ -170,28 +171,23 @@ function MainFeature({ onUpdate }) {
     }, 800);
   };
   
-  const promptToSelectFarm = () => {
-    if (farms.length === 0) {
-      alert("You need to create a farm first before adding crops.");
-      setActiveTab('farms');
-    } else {
-      alert("Please select a farm to add this crop to.");
-      setActiveTab('farms');
-    }
-  };
-  
   const handleCropFormOpen = (farmId = null) => {
-    if (farmId) {
-      setSelectedFarmId(farmId);
-      setShowCropForm(true);
-      setCropFormData({
-        cropName: '',
-        plantDate: '',
-        expectedHarvest: '',
-        notes: ''
-      });
-      setFormErrors({});
-    } else promptToSelectFarm();
+    if (!farmId && farms.length === 0) {
+      alert("Please create a farm first before adding crops.");
+      setActiveTab('farms');
+      return;
+    }
+    
+    setSelectedFarmId(farmId);
+    setShowFarmSelector(!farmId && farms.length > 0);
+    setShowCropForm(true);
+    setCropFormData({
+      cropName: '',
+      plantDate: '',
+      expectedHarvest: '',
+      notes: ''
+    });
+    setFormErrors({});
   };
   
   const handleCropFormClose = () => {
@@ -202,10 +198,16 @@ function MainFeature({ onUpdate }) {
   const handleCropSubmit = (e) => {
     e.preventDefault();
     
-    if (!validateCropForm()) {
+
+    // Get the selected farmId from the dropdown if no farmId was passed
+    const farmId = selectedFarmId || document.getElementById('farmSelector').value;
+    
+    if (!farmId) {
+      setFormErrors({...formErrors, farmSelector: "Please select a farm"});
       return;
     }
-    
+    if (!validateCropForm()) {
+      return;
     setIsSubmitting(true);
     
     setTimeout(() => {
@@ -217,8 +219,8 @@ function MainFeature({ onUpdate }) {
         notes: cropFormData.notes
       };
       
-      setFarms(prev => prev.map(farm => 
-        farm.id === selectedFarmId 
+      setFarms(prev => prev.map(farm =>
+        farm.id === farmId
           ? { ...farm, crops: [...(farm.crops || []), newCrop] } 
           : farm
       ));
@@ -226,6 +228,7 @@ function MainFeature({ onUpdate }) {
       setIsSubmitting(false);
       handleCropFormClose();
     }, 800);
+    }
   };
   
   const toggleFarmExpand = (farmId) => {
@@ -629,6 +632,19 @@ function MainFeature({ onUpdate }) {
                 <CropIcon className="h-5 w-5 text-green-500" />
                 Add New Crop
               </h3>
+              {showFarmSelector && (
+                <div className="form-group mb-2">
+                  <label htmlFor="farmSelector" className="form-label flex items-center gap-1">
+                    <FarmIcon className="h-4 w-4" />
+                    Select Farm*
+                  </label>
+                  <select id="farmSelector" className={`input-field ${formErrors.farmSelector ? 'border-red-500 dark:border-red-400' : ''}`}>
+                    <option value="">Select a farm</option>
+                    {farms.map(farm => <option key={farm.id} value={farm.id}>{farm.name}</option>)}
+                  </select>
+                  {formErrors.farmSelector && <p className="text-red-500 text-xs mt-1">{formErrors.farmSelector}</p>}
+                </div>
+              )}
               <button 
                 onClick={handleCropFormClose}
                 className="p-1 rounded-full hover:bg-surface-100 dark:hover:bg-surface-700"
