@@ -234,7 +234,6 @@ function MainFeature({ onUpdate }) {
       handleCropFormClose();
     }, 800);
     }
-  };
   
   const toggleFarmExpand = (farmId) => {
     setFarms(prev => 
@@ -566,6 +565,8 @@ function MainFeature({ onUpdate }) {
                                   >
                                     <PlusIcon className="h-4 w-4 mr-1" />
                                     Add New Crop
+                                  </button>
+                                </div>
                               </div>
                               </div>
                             </motion.div>
