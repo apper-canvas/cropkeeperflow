@@ -142,6 +142,7 @@ function MainFeature({ onUpdate }) {
     if (formErrors[name]) {
       setFormErrors(prev => ({ ...prev, [name]: undefined }));
     }
+  };
 
   const handleExpenseInputChange = (e) => {
     const { name, value } = e.target;
